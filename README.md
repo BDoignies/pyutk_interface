@@ -27,7 +27,7 @@ The path must point to the directory enclosing the binaries. If the step describ
 Usage
 -----
 
-Here are two scripts that shows capabilities most common usage of the library : 
+Here are two scripts that shows most common usage of the library : 
 
 ```python
 import pyutk
