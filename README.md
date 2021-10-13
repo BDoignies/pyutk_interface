@@ -18,8 +18,8 @@ python setup.py install --utk path_to_utk/build/src
 ```
 
 The first version is a basic installation of the library. Each time the library is used the 
-path to built UTK must be set via `pyutk.set_dir(path_to_utk)`.
-The second will bind the library to the (absolute) path provided and it won't be necessary
+path to UTK must be set via `pyutk.set_dir(path_to_utk)`.
+The second will bind the library to the path provided and it won't be necessary
 to provide the path each time. 
 
 The path must point to the directory enclosing the binaries. If the step described [here](https://utk-team.github.io/utk/) have been followed with no addition, the path should end with "build/src". 
