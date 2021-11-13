@@ -3,7 +3,6 @@ import uuid
 import subprocess
 import tempfile
 import numpy as np
-from contextlib import contextmanager
 
 __UTK__DIR__ = ""
 __UTK__WDIR__ = tempfile.gettempdir()
