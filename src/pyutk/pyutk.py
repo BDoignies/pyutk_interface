@@ -516,8 +516,9 @@ class Discrepancy:
                     The computed discrepancy metrics
         """
         tmpfile = os.path.join(__UTK__WDIR__, uuid.uuid4().hex + ".dat")
-        writer = PointWriter()
-        writer.write(tmpfile, points)
+        writer = PointWriter(tmpfile)
+        writer.write(points)
+        writer.close()
 
         result = self.compute_from_file(tmpfile, s, clean)
 
