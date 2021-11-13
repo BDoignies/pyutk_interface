@@ -1,9 +1,9 @@
-from genericpath import isfile
 import os
 import uuid
 import subprocess
 import tempfile
 import numpy as np
+from contextlib import contextmanager
 
 __UTK__DIR__ = ""
 __UTK__WDIR__ = tempfile.gettempdir()
@@ -248,12 +248,67 @@ class PointWriter:
 
         Parameters
         ----------
+            file: str [defailt=None]
             sep: char [default='\t']
+            pointset_sep: char [default='#']
+            append: bool [default=True]
     """
-    def __init__(self, sep='\t'):
+    def __init__(self, file=None, sep='\t', pointset_sep="#", append=True):
         self.sep = sep
+        self.pointset_sep = pointset_sep
+        self.append = append
+        self.open_mode = 'a+' if append else 'w+'
+    
+        self.file = None
+        if file is not None:
+            self.open(file)
+    
+    def open(self, outFile):
+        if self.file is not None:
+            self.close()
 
-    def write(self, outfile, points):
+        self.file = open(outFile, self.open_mode)
+        return self
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+
+    def __write_points(self, file, points):
+        """
+            Writes a pointset to file
+
+            Parameters
+            ==========
+                file: file
+                    The file to write to
+                points: np array like
+                    The points to write
+        """
+        points = points.astype(str)
+        for point in points:
+            file.write(self.sep.join(point.tolist()))
+            file.write("\n")
+
+    def __process_header(self, file):
+        if self.append:
+            current = self.file.tell()
+            # Nothing in the file yet
+            if current == 0:
+                return
+            
+            self.file.seek(current -1)
+            current_char = self.file.read(1)
+            self.file.seek(current)
+
+            if current_char != '\n':
+                self.file.write('\n')
+            self.file.write(self.pointset_sep)
+            self.file.write('\n')
+
+    def write(self, points=np.asarray([[]])):
         """ 
             Writes the points to a file
 
@@ -266,10 +321,21 @@ class PointWriter:
                 points: np array like
                     The points to write
         """
-        with open(outfile, "w") as file:
-            for point in points:
-                file.write(self.sep.join([str(c) for c in point]))
-                file.write("\n")
+        if points.ndim == 2:
+            self.__process_header(self.file)
+            self.__write_points(self.file, points)
+        else:
+            for p in points:
+                self.__write_points(self.file, p)
+                self.file.write(self.pointset_sep)
+                self.file.write("\n")
+
+    def close(self):
+        """
+            Close the file
+        """
+        self.file.close()
+        self.file = None
                 
 class DiscrepancyReader:
     """

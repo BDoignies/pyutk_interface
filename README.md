@@ -48,8 +48,12 @@ import pyutk
 import numpy as np
 # Reader and writer does not requires utk path to be set
 samples = np.random.uniform(0, 1, (123, 2)) # 2-d Whitenoise
-writer = pyutk.PointWriter()
-writer.write("out.dat", samples)
+
+# Context manager is supported (only for now) for writting
+# Writting can also be done by calling at first .open(path)
+# then .write(points) and by closing the file (.close())
+with pyutk.PointWriter("out.dat") as writer:
+    writer.write(samples)
 
 reader = pyutk.PointReader(samples.shape[0], samples.shape[1]) # Specify number of coordinates to read
 print(np.all(samples == reader.read("out.dat")))
