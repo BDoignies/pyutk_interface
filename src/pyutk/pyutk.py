@@ -172,10 +172,11 @@ class PointReader:
             sep: str [default="\t"]
                 The separator between each coordinate
     """
-    def __init__(self, n, d, sep="\t"):
+    def __init__(self, n, d, sep="\t", collapse_m=True):
         self.n = n
         self.d = d
         self.sep = sep
+        self.collapse_m = collapse_m
 
     def read(self, filepath):
         """
@@ -233,13 +234,28 @@ class PointReader:
                 np array
                     An array of shape (n, d) with each points filled    
         """
-        points = np.empty((self.n, self.d), dtype=np.double)
         with open(filepath, "r") as file:
-            for i, point in enumerate(file):
-                coords = list(map(np.double, point.strip().split(self.sep)))
-                points[i] = coords
-        
-        return points
+            data = file.readlines()
+            N = -1
+            d = -1
+            m = -1
+
+            for line in data:
+                if line == "#\n":
+                    break
+
+                d = line.count("\t") + 1
+                N = N + 1
+            N = N + 1
+            m = data.count("#\n") + 1 # + 1 because no # for the first one
+
+            data = [
+                list(map(lambda x: float(x), line.replace("\n", "").split("\t"))) for line in data if line != "#\n"
+            ]    
+            data = np.asarray(data).flatten()
+            if self.collapse_m and m == 1:
+                return data.reshape((N, d))
+            return data.reshape((m, N, d))
 
 class PointWriter:
     """
